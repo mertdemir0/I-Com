@@ -1,0 +1,21 @@
+{
+    "positivo": 1, "negativo": -1, "crescita": 1, "crisi": -1, "aumento": 1, "diminuzione": -1,
+    "miglioramento": 1, "peggioramento": -1, "successo": 2, "fallimento": -2, "vittoria": 2, "sconfitta": -2,
+    "ottimismo": 1, "pessimismo": -1, "speranza": 1, "preoccupazione": -1, "fiducia": 1, "sfiducia": -1,
+    "progresso": 1, "regresso": -1, "innovazione": 1, "stagnazione": -1, "stabilità": 1, "instabilità": -1,
+    "pace": 2, "guerra": -2, "accordo": 1, "conflitto": -1, "collaborazione": 1, "opposizione": -1,
+    "sviluppo": 1, "declino": -1, "crescente": 1, "calante": -1, "promettente": 1, "minaccioso": -1,
+    "sicurezza": 1, "pericolo": -1, "prosperità": 2, "recessione": -2, "recupero": 1, "perdita": -1,
+    "riforma": 1, "scandalo": -2, "progresso": 1, "corruzione": -2, "trasparenza": 1, "oscurità": -1,
+    "democrazia": 1, "dittatura": -2, "libertà": 2, "oppressione": -2, "giustizia": 1, "ingiustizia": -1,
+    "soluzione": 1, "problema": -1, "opportunità": 1, "sfida": -1, "vantaggio": 1, "svantaggio": -1,
+    "beneficio": 1, "danno": -1, "profitto": 1, "perdita": -1, "guadagno": 1, "costo": -1,
+    "salute": 1, "malattia": -1, "cura": 1, "epidemia": -2, "vaccino": 1, "virus": -1,
+    "ambiente": 1, "inquinamento": -1, "sostenibilità": 1, "degrado": -1, "rinnovabile": 1, "esaurimento": -1,
+    "educazione": 1, "ignoranza": -1, "conoscenza": 1, "disinformazione": -1, "verità": 1, "falsità": -1,
+    "occupazione": 1, "disoccupazione": -1, "assunzione": 1, "licenziamento": -1, "stipendio": 1, "debito": -1,
+    "investimento": 1, "spreco": -1, "risparmio": 1, "spesa": -1, "profitto": 1, "deficit": -1,
+    "innovazione": 1, "obsolescenza": -1, "modernizzazione": 1, "arretratezza": -1, "avanzamento": 1, "regressione": -1,
+    "cooperazione": 1, "competizione": -1, "alleanza": 1, "rivalità": -1, "unità": 1, "divisione": -1,
+    "ricostruzione": 1, "distruzione": -2, "riparazione": 1, "danno": -1, "miglioramento": 1, "deterioramento": -1
+}

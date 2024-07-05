@@ -1,0 +1,611 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving
+and Interchange DTD v1.2 20190208//EN" "JATS-archivearticle1.dtd">
+
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="other">
+
+<front>
+
+
+<article-meta>
+
+
+<title-group>
+<article-title>Sentiment Analysis with Python</article-title>
+</title-group>
+
+<contrib-group>
+<contrib contrib-type="author" corresp="yes">
+<name>
+<surname>Demir</surname>
+<given-names>Mert</given-names>
+</name>
+<string-name>Mert Demir</string-name>
+
+<role>Research</role>
+<role></role>
+<role>Data</role>
+<role></role>
+<role>Scientist</role>
+<xref ref-type="aff" rid="aff-1">a</xref>
+<xref ref-type="corresp" rid="cor-1">&#x002A;</xref>
+</contrib>
+</contrib-group>
+<aff id="aff-1">
+<institution-wrap>
+<institution>Fondazione Eni Enrico Mattei</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<author-notes>
+<corresp id="cor-1"></corresp>
+</author-notes>
+
+
+
+
+
+
+
+
+
+<history></history>
+
+
+
+
+
+
+</article-meta>
+
+</front>
+
+<body>
+<sec id="introduction">
+  <title>Introduction</title>
+  <p>Today, we’ll explore an advanced Python script that performs news
+  sentiment analysis and aggregation from RSS feeds. We’ll cover
+  asynchronous programming, natural language processing, database
+  operations, and task scheduling.</p>
+</sec>
+<sec id="introduction-to-key-concepts">
+  <title>Introduction to Key Concepts</title>
+  <sec id="asynchronous-programming">
+    <title>Asynchronous Programming</title>
+    <p>Asynchronous programming is a programming paradigm that allows
+    multiple operations to be executed concurrently without blocking the
+    main thread of execution. In Python, this is primarily achieved
+    using the <monospace>asyncio</monospace> module and the
+    <monospace>async/await</monospace> syntax.</p>
+    <p>Key benefits of asynchronous programming include:</p>
+    <list list-type="order">
+      <list-item>
+        <p>Improved performance for I/O-bound tasks</p>
+      </list-item>
+      <list-item>
+        <p>Better resource utilization</p>
+      </list-item>
+      <list-item>
+        <p>Enhanced scalability for applications handling many
+        concurrent operations</p>
+      </list-item>
+    </list>
+    <p>In our script, we use asynchronous programming to efficiently
+    fetch data from multiple RSS feeds simultaneously, significantly
+    reducing the overall execution time compared to a synchronous
+    approach.</p>
+  </sec>
+  <sec id="large-language-models-llms">
+    <title>Large Language Models (LLMs)</title>
+    <p>Large Language Models are advanced AI models trained on vast
+    amounts of text data. They can understand and generate human-like
+    text, and perform various natural language processing tasks such as
+    sentiment analysis, text classification, and language
+    translation.</p>
+    <p>Some key characteristics of LLMs include:</p>
+    <list list-type="order">
+      <list-item>
+        <p><bold>Massive scale:</bold> Trained on billions of
+        parameters</p>
+      </list-item>
+      <list-item>
+        <p><bold>Versatility:</bold> Can be fine-tuned for specific
+        tasks</p>
+      </list-item>
+      <list-item>
+        <p><bold>Context understanding:</bold> Can comprehend nuanced
+        language use</p>
+      </list-item>
+    </list>
+    <p>In our script, we use a pre-trained BERT (Bidirectional Encoder
+    Representations from Transformers) model, which is a type of LLM.
+    Specifically, we’re using an Italian BERT model for sentiment
+    analysis of Italian news articles.</p>
+    <p>We’re using an LLM for this task because:</p>
+    <list list-type="order">
+      <list-item>
+        <p><bold>Accuracy:</bold> LLMs can capture subtle nuances in
+        language, leading to more accurate sentiment analysis.</p>
+      </list-item>
+      <list-item>
+        <p><bold>Efficiency:</bold> Pre-trained models can be quickly
+        adapted to our specific use case without extensive training.</p>
+      </list-item>
+      <list-item>
+        <p><bold>Multilingual capability:</bold> We can easily switch to
+        models for different languages if needed.</p>
+      </list-item>
+    </list>
+  </sec>
+</sec>
+<sec id="install">
+  <title>Install</title>
+  <code language="python">pip install asyncio aiohttp feedparser pandas transformers torch apscheduler</code>
+</sec>
+<sec id="import-statements">
+  <title>Import Statements</title>
+  <code language="python">import asyncio # framework for writing asynchronous code
+import aiohttp # an asynchronous HTTP client/server framework for asyncio
+import feedparser # for parsing RSS
+import csv
+import sqlite3 # working with SQLite databases
+from datetime import datetime
+from urllib.parse import urlparse #to parse URLs into their components
+import pandas as pd
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
+# provides pre-trained models for natural language processing tasks
+import torch # used for machine learning tasks
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+# used for scheduling tasks asynchronously
+import logging</code>
+  <disp-quote>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>AutoModelForSequenceClassification</monospace>:
+        Automatically loads a pre-trained model for sequence
+        classification tasks.</p>
+      </list-item>
+    </list>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>AutoTokenizer</monospace>: Automatically loads the
+        appropriate tokenizer for a given model.</p>
+      </list-item>
+    </list>
+  </disp-quote>
+  <code language="python"># Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')</code>
+</sec>
+<sec id="model-initiliazation">
+  <title>Model Initiliazation</title>
+  <code language="python"># Initialize BERT model and tokenizer
+model_name = &quot;dbmdz/bert-base-italian-uncased&quot;
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSequenceClassification.from_pretrained(model_name)</code>
+  <disp-quote>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>model_name</monospace>: a pre-trained Italian BERT
+        model.</p>
+      </list-item>
+    </list>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>AutoTokenizer</monospace>: Automatically loads the
+        appropriate tokenizer for the model. Tokenizers convert text
+        into a format the model can understand.</p>
+      </list-item>
+    </list>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>AutoModelForSequenceClassification</monospace>:
+        Loads the pre-trained model for sentiment classification. This
+        class automatically configures the model for sequence
+        classification tasks.</p>
+      </list-item>
+    </list>
+  </disp-quote>
+  <graphic mimetype="image" mime-subtype="png" xlink:href="images/1_CdjbU3J5BYuIi-4WbWnKng.png" />
+  <disp-quote>
+    <p>We use these because they provide a convenient way to use NLP
+    models without training from scratch.</p>
+  </disp-quote>
+</sec>
+<sec id="data-sources-and-keywords">
+  <title>Data Sources and Keywords</title>
+  <code language="python">RSS_SOURCES = [
+    &quot;https://www.repubblica.it/rss/homepage/rss2.0.xml&quot;,
+    &quot;https://www.corriere.it/rss/homepage.xml&quot;,
+    # Now we will find RSS feeds
+]
+# You can adjust the keywords for the topics you wanna perform sentiment analysis.
+KEYWORDS = [&quot;economia&quot;, &quot;politica&quot;, &quot;tecnologia&quot;, &quot;salute&quot;, &quot;nucleare&quot;, &quot;covid&quot;]</code>
+  <code language="python"># This set will store processed article links to avoid duplicates.
+processed_links = set()</code>
+</sec>
+<sec id="sentiment-analysis-function">
+  <title>Sentiment Analysis Function</title>
+  <code language="python">def analyze_sentiment(text):
+    inputs = tokenizer(text, return_tensors=&quot;pt&quot;, truncation=True, max_length=512, padding=True)
+    
+    with torch.no_grad():
+        outputs = model(**inputs)
+    
+    logits = outputs.logits
+    probabilities = torch.softmax(logits, dim=1)
+    sentiment_score = probabilities[0, 1].item() - probabilities[0, 0].item()  # Positive - Negative
+    
+    return sentiment_score</code>
+  <disp-quote>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>text</monospace>: The input text to tokenize.</p>
+      </list-item>
+    </list>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>return_tensors=&quot;pt&quot;</monospace>: Returns
+        PyTorch tensors.</p>
+      </list-item>
+    </list>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>truncation=True</monospace>: Truncates text longer
+        than the model’s maximum input length.</p>
+      </list-item>
+    </list>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>max_length=512</monospace>: Sets the maximum
+        length of the input.</p>
+      </list-item>
+    </list>
+    <list list-type="bullet">
+      <list-item>
+        <p><monospace>padding=True</monospace>: Pads shorter sequences
+        to the maximum length.</p>
+      </list-item>
+    </list>
+  </disp-quote>
+  <disp-quote>
+    <p><bold>Calculating Sentiment Score:</bold></p>
+    <p><monospace>sentiment_score</monospace> calculates the sentiment
+    score by subtracting the negative sentiment probability from the
+    positive sentiment probability.</p>
+  </disp-quote>
+</sec>
+<sec id="keyword-search-function">
+  <title>Keyword Search Function</title>
+  <code language="python">def search_keywords(text):
+    text_lower = text.lower()
+    return [keyword for keyword in KEYWORDS if keyword in text_lower]</code>
+  <disp-quote>
+    <p>comprehension returns all keywords found in the lowercase
+    text</p>
+  </disp-quote>
+</sec>
+<sec id="asynchronous-news-fetching-function">
+  <title>Asynchronous News Fetching Function</title>
+  <code language="python">async def fetch_news_async(rss_url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(rss_url) as response:
+            content = await response.text()
+            return feedparser.parse(content)</code>
+</sec>
+<sec id="website-name-extraction-function">
+  <title>Website Name Extraction Function</title>
+  <code language="python">def get_website_name(url):
+    parsed_url = urlparse(url)
+    return parsed_url.netloc # returns the network location (domain) part of the URL</code>
+</sec>
+<sec id="main-processing-function">
+  <title>Main Processing Function</title>
+  <code language="python">async def process_feeds():
+    results = [] # empty list to store the results
+    for source in RSS_SOURCES:
+        feed = await fetch_news_async(source)
+        if feed:
+            for item in feed.entries:
+                link = item.get('link', '')
+                if link not in processed_links: # checks if the link has already been processed
+                    full_text = item.get('title', '') + ' ' + item.get('summary', '')
+                    sentiment = analyze_sentiment(full_text)
+                    matched_keywords = search_keywords(full_text)
+                    results.append({
+                        'title': item.get('title', ''),
+                        'full_text': full_text,
+                        'link': link,
+                        'source': get_website_name(source),
+                        'sentiment': sentiment,
+                        'pub_date': item.get('published', ''),
+                        'author': item.get('author', ''),
+                        'keywords': ', '.join(matched_keywords)
+                    })
+                    processed_links.add(link)
+    return results</code>
+</sec>
+<sec id="csv-saving-function">
+  <title>CSV Saving Function</title>
+  <code language="python">def save_to_csv(data, filename='news_sentiment.csv'):
+    with open(filename, 'a', newline='', encoding='utf-8') as file: # 'a' for append mode
+        writer = csv.DictWriter(file, fieldnames=data[0].keys())
+        if file.tell() == 0:
+            writer.writeheader()
+        writer.writerows(data)</code>
+</sec>
+<sec id="database-saving-function">
+  <title>Database Saving Function</title>
+  <code language="python">def save_to_database(data, db_name='news_sentiment.db'):
+    conn = sqlite3.connect(db_name)
+    df = pd.DataFrame(data)
+    df.to_sql('news', conn, if_exists='append', index=False)
+    conn.close()</code>
+</sec>
+<sec id="main-execution-function">
+  <title>Main Execution Function</title>
+  <code language="python">async def main():
+    results = await process_feeds()
+    if results:
+        save_to_csv(results)
+        save_to_database(results)
+        logging.info(f&quot;Processed {len(results)} new news items.&quot;)
+    else:
+        logging.info(&quot;No new news items to process.&quot;)</code>
+</sec>
+<sec id="scheduled-job-function">
+  <title>Scheduled Job Function</title>
+  <code language="python">def scheduled_job():
+    asyncio.run(main())</code>
+</sec>
+<sec id="main-execution-block">
+  <title>Main Execution Block</title>
+  <code language="python">if __name__ == &quot;__main__&quot;:
+    # Run the job immediately
+    scheduled_job()
+    
+    # Set up the scheduler
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(scheduled_job, 'interval', hours=1) # you can change the hour
+    scheduler.start()
+    logging.info(&quot;Scheduler started. Press Ctrl+C to exit.&quot;)
+
+    try:
+        asyncio.get_event_loop().run_forever()
+    except (KeyboardInterrupt, SystemExit):
+        pass</code>
+  <graphic mimetype="image" mime-subtype="jpeg" xlink:href="images/istockphoto-1345220254-612x612.jpg" />
+</sec>
+<sec id="to-do">
+  <title>To-Do</title>
+  <list list-type="bullet">
+    <list-item>
+      <p>Implement error handling and retries for RSS feed fetching</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Add a retry mechanism for failed HTTP requests</p>
+        </list-item>
+        <list-item>
+          <p>Implement exponential backoff for repeated failures</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Enhance the sentiment analysis model</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Consider fine-tuning the BERT model on domain-specific
+          data</p>
+        </list-item>
+        <list-item>
+          <p>Implement a more nuanced sentiment scale (e.g., very
+          negative, negative, neutral, positive, very positive)</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Improve topic modeling</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Experiment with different numbers of topics for the NMF
+          mode</p>
+        </list-item>
+        <list-item>
+          <p>Implement dynamic topic modeling to adapt to changing news
+          trends</p>
+        </list-item>
+        <list-item>
+          <p>Consider using more advanced topic modeling techniques like
+          LDA (Latent Dirichlet Allocation)</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Optimize database operations</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Implement batch inserts for better performance</p>
+        </list-item>
+        <list-item>
+          <p>Add indexes to frequently queried columns</p>
+        </list-item>
+        <list-item>
+          <p>Consider using an ORM like SQLAlchemy for better database
+          management</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Enhance the dashboard</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Add more visualizations (e.g., word clouds, topic
+          distribution pie charts)</p>
+        </list-item>
+        <list-item>
+          <p>Implement user authentication for the dashboard</p>
+        </list-item>
+        <list-item>
+          <p>Add the ability to export data in various formats (CSV,
+          JSON, etc.)</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Implement caching</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Use a caching mechanism (e.g., Redis) to store frequently
+          accessed data and reduce database load</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Add more data sources</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Integrate with news APIs for a broader range of sources</p>
+        </list-item>
+        <list-item>
+          <p>Implement web scraping for sources without RSS feeds</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Improve logging and monitoring</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Implement more detailed logging for better debugging</p>
+        </list-item>
+        <list-item>
+          <p>Add system monitoring (e.g., CPU usage, memory usage,
+          database performance)</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Enhance configurability</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Make more parameters configurable through the config
+          file</p>
+        </list-item>
+        <list-item>
+          <p>Implement a web interface for changing configuration
+          settings</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Implement data cleaning and preprocessing</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Add text cleaning functions (e.g., removing HTML tags,
+          handling special characters)</p>
+        </list-item>
+        <list-item>
+          <p>Implement language detection to filter out non-Italian
+          content</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Add unit tests and integration tests</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Write unit tests for individual functions</p>
+        </list-item>
+        <list-item>
+          <p>Implement integration tests for the entire pipeline</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Optimize performance</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Profile the code to identify bottlenecks</p>
+        </list-item>
+        <list-item>
+          <p>Implement multiprocessing for CPU-bound tasks</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Implement data retention policies</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Add functionality to archive or delete old news items</p>
+        </list-item>
+        <list-item>
+          <p>Implement data compression for long-term storage</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Enhance specific topic detection</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Implement machine learning-based classification for
+          specific topics</p>
+        </list-item>
+        <list-item>
+          <p>Allow users to define and train custom topics</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+  <list list-type="bullet">
+    <list-item>
+      <p>Add trend detection</p>
+      <list list-type="bullet">
+        <list-item>
+          <p>Implement algorithms to detect sudden changes in sentiment
+          or topic popularity</p>
+        </list-item>
+        <list-item>
+          <p>Add alerts for significant trend changes</p>
+        </list-item>
+      </list>
+    </list-item>
+  </list>
+</sec>
+</body>
+
+<back>
+</back>
+
+
+
+</article>

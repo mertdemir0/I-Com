@@ -1,0 +1,7 @@
+{
+    "rss_sources_file": "rss_sources.json",
+    "database_file": "news_sentiment.db",
+    "batch_size": 10,
+    "update_interval": 3600,
+    "dashboard_port": 8050
+}
